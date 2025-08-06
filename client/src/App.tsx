@@ -25,7 +25,7 @@ function App() {
 
   return (
     <Show when={!loading()} fallback="Loading...">
-      <div>Server is: {serverOk() ? "Online" : "Offline"}</div>
+      <div class="p-4">Server is: {serverOk() ? "Online" : "Offline"}</div>
     </Show>
   );
 }
