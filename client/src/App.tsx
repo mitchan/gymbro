@@ -1,7 +1,9 @@
 import { createSignal, onMount, Show } from "solid-js";
 import "./App.css";
+import type { JSX } from "solid-js/jsx-runtime";
+import { A } from "@solidjs/router";
 
-function App() {
+function App(props: { children?: JSX.Element }) {
   const [loading, setLoading] = createSignal(true);
   const [serverOk, setServerOk] = createSignal(false);
 
@@ -23,10 +25,11 @@ function App() {
   });
 
   return (
-    <Show when={!loading()} fallback="Loading...">
-      <div class="bg-red-50 p-4">
-        Server is: {serverOk() ? "Online" : "Offline"}
+    <Show when={!loading() || !serverOk()} fallback="Loading...">
+      <div class="p-4 text-center">
+        <A href="/">GymBro</A>
       </div>
+      {props.children}
     </Show>
   );
 }
