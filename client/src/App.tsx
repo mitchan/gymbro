@@ -15,10 +15,6 @@ function App() {
         throw new Error("Generic error");
       })
       .then(() => {
-        const x = 1;
-        if (x === "test") {
-          console.log("asdas");
-        }
         setServerOk(true);
       })
       .finally(() => {
