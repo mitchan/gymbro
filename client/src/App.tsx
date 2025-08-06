@@ -15,7 +15,7 @@ function App() {
         throw new Error("Generic error");
       })
       .then(() => {
-        console.log("test workflow 1");
+        console.log("test workflow 2");
         setServerOk(true);
       })
       .finally(() => {
