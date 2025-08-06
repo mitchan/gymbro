@@ -15,7 +15,10 @@ function App() {
         throw new Error("Generic error");
       })
       .then(() => {
-        console.log("test workflow 2");
+        const x = 1;
+        if (x === "test") {
+          console.log("asdas");
+        }
         setServerOk(true);
       })
       .finally(() => {
