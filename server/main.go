@@ -4,9 +4,17 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/mitchan/gymbro/db"
 )
 
 func main() {
+	dbConn, err := db.NewDatabase()
+	if err != nil {
+		log.Fatalf("Could not initialize DB connection: %s", err)
+	}
+	defer dbConn.Close()
+
 	http.HandleFunc("/api/test", func(w http.ResponseWriter, r *http.Request) {
 		type responsePayload struct {
 			Success bool `json:"success"`
