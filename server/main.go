@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/mitchan/gymbro/db"
+	"github.com/mitchan/gymbro/db/migrations"
 )
 
 func main() {
@@ -14,6 +15,16 @@ func main() {
 		log.Fatalf("Could not initialize DB connection: %s", err)
 	}
 	defer dbConn.Close()
+
+	if err := dbConn.Ping(); err != nil {
+		log.Fatalf("Failed to ping database: %v", err)
+	}
+	log.Println("Connected to database successfully")
+
+	// Run migrations
+	if err := migrations.RunMigrations(dbConn); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
 
 	http.HandleFunc("/api/test", func(w http.ResponseWriter, r *http.Request) {
 		type responsePayload struct {
