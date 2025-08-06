@@ -3,11 +3,15 @@ import "./App.css";
 import type { JSX } from "solid-js/jsx-runtime";
 import { A } from "@solidjs/router";
 
+import * as rd from "@devexperts/remote-data-ts";
+
 function App(props: { children?: JSX.Element }) {
-  const [loading, setLoading] = createSignal(true);
-  const [serverOk, setServerOk] = createSignal(false);
+  const [serverOk, setServerOk] = createSignal<rd.RemoteData<unknown, boolean>>(
+    rd.initial
+  );
 
   onMount(() => {
+    setServerOk(rd.pending);
     fetch("http://localhost:8080/api/test")
       .then((resp) => {
         if (resp.ok) {
@@ -17,15 +21,15 @@ function App(props: { children?: JSX.Element }) {
         throw new Error("Generic error");
       })
       .then(() => {
-        setServerOk(true);
+        setServerOk(rd.success(false));
       })
-      .finally(() => {
-        setLoading(false);
+      .catch((error) => {
+        rd.failure(error);
       });
   });
 
   return (
-    <Show when={!loading() || !serverOk()} fallback="Loading...">
+    <Show when={rd.isSuccess(serverOk())} fallback="Loading...">
       <div class="p-4 text-center">
         <A href="/">GymBro</A>
       </div>
