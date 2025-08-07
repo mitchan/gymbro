@@ -7,7 +7,7 @@
     "build": "tsc -b && vite build",
     "dev": "vite",
     "preview": "vite preview",
-    "tsc": "tsc --noEmit"
+    "tsc": "tsc"
   },
   "dependencies": {
     "@devexperts/remote-data-ts": "^2.1.1",
