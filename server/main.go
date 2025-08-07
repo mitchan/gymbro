@@ -7,6 +7,9 @@ import (
 
 	"github.com/mitchan/gymbro/db"
 	"github.com/mitchan/gymbro/db/migrations"
+	"github.com/mitchan/gymbro/handler"
+	"github.com/mitchan/gymbro/repository"
+	"github.com/mitchan/gymbro/service"
 )
 
 func main() {
@@ -25,6 +28,17 @@ func main() {
 	if err := migrations.RunMigrations(dbConn); err != nil {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
+
+	// repos
+	userRepo := repository.NewUserRepository(dbConn)
+
+	// services
+	userService := service.NewUserService(userRepo)
+
+	// handlers
+	userHandler := handler.NewUserHandler(userService)
+
+	http.HandleFunc("POST /api/user", userHandler.CreateUser)
 
 	http.HandleFunc("/api/test", func(w http.ResponseWriter, r *http.Request) {
 		type responsePayload struct {
