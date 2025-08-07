@@ -36,3 +36,9 @@ jobs:
 
       - name: Check typescript
         run: npm run tsc
+
+      - name: Linting
+        run: npm run eslint:check
+
+      - name: Formatting
+        run: npm run prettier:check
