@@ -21,9 +21,6 @@ function App(props: { children?: JSX.Element }) {
         throw new Error("Generic error");
       })
       .then(() => {
-        if (1 === "1") {
-          console.log("test");
-        }
         setServerOk(rd.success(false));
       })
       .catch((error) => {
