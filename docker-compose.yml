@@ -24,6 +24,7 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=gymbro_db
+      - JWT_SECRET_KEY=my-very-secret-key
     depends_on:
       - db
     restart: unless-stopped

@@ -10,5 +10,15 @@ export default defineConfig({
     hmr: {
       clientPort: 3000,
     },
+    proxy: {
+      "/api": {
+        target: "http://server:8080",
+        changeOrigin: true,
+        secure: false,
+        configure: (proxy) => {
+          proxy.on("proxyReq", () => {});
+        },
+      },
+    },
   },
 });
