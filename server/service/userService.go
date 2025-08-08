@@ -36,7 +36,7 @@ func (userService *UserService) CreateUser(req model.CreateUser) (*model.Respons
 		return nil, fmt.Errorf("username, email, and password are required")
 	}
 
-	if len(req.Password) < 6 {
+	if len(req.Password) < 8 {
 		log.Printf("UserService.CreateUser - Validation failed: password too short")
 		return nil, fmt.Errorf("password must be at least 6 characters")
 	}
