@@ -2,11 +2,16 @@ import { createSignal } from "solid-js";
 import { InputText } from "../components/inputs/InputText";
 import { Button } from "../components/ui/Button";
 import z from "zod";
+import { setUser } from "../store/app";
+import { useNavigate } from "@solidjs/router";
 
 export default function Register() {
+  const navigate = useNavigate();
+
   const [username, setUsername] = createSignal("");
   const [email, setEmail] = createSignal("");
   const [password, setPassword] = createSignal("");
+  const [loading, setLoading] = createSignal(false);
 
   function onSubmit(e: SubmitEvent) {
     e.preventDefault();
@@ -29,10 +34,29 @@ export default function Register() {
       return;
     }
 
+    setLoading(true);
     fetch("/api/user", {
       method: "POST",
       body: JSON.stringify(user.data),
-    });
+    })
+      .then((resp) => {
+        if (!resp.ok) {
+          throw new Error("HTTP error");
+        }
+
+        return resp.json();
+      })
+      .then((user) => {
+        setUser(user);
+        navigate("/", { replace: true });
+      })
+      .finally(() => {
+        setLoading(false);
+      })
+      .catch((error) => {
+        // TODO: show error to the user
+        console.error(error);
+      });
   }
 
   return (
@@ -59,7 +83,7 @@ export default function Register() {
         onChange={setPassword}
       />
 
-      <Button label="Registrati" type="submit" />
+      <Button label="Registrati" type="submit" disabled={loading()} />
     </form>
   );
 }
