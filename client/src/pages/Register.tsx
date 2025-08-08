@@ -10,7 +10,7 @@ export default function Register() {
   function onSubmit(e: SubmitEvent) {
     e.preventDefault();
 
-    fetch("http://localhost:8080/api/user", {
+    fetch("/api/user", {
       method: "POST",
       body: JSON.stringify({
         email: email(),

@@ -34,16 +34,22 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.userService.CreateUser(req)
+	user, err := h.userService.CreateUser(req)
 	if err != nil {
 		log.Printf("CreateUser - Service error: %v", err)
 		util.WriteError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	payload := responsePayload{Success: false}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt",
+		Value:    user.AccessToken,
+		Path:     "/",
+		MaxAge:   60 * 60 * 24,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	})
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(payload)
+	util.WriteJSON(w, http.StatusCreated, user)
 }
