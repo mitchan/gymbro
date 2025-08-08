@@ -9,6 +9,7 @@ import (
 	"github.com/mitchan/gymbro/db/migrations"
 	"github.com/mitchan/gymbro/handler"
 	"github.com/mitchan/gymbro/repository"
+	"github.com/mitchan/gymbro/router"
 	"github.com/mitchan/gymbro/service"
 )
 
@@ -38,7 +39,7 @@ func main() {
 	// handlers
 	userHandler := handler.NewUserHandler(userService)
 
-	http.HandleFunc("POST /api/user", userHandler.CreateUser)
+	router.SetupRouter(userHandler)
 
 	http.HandleFunc("/api/test", func(w http.ResponseWriter, r *http.Request) {
 		type responsePayload struct {

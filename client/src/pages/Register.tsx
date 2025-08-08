@@ -3,24 +3,30 @@ import { InputText } from "../components/inputs/InputText";
 import { Button } from "../components/ui/Button";
 
 export default function Register() {
-  const [name, setName] = createSignal("");
-  const [surname, setSurname] = createSignal("");
+  const [username, setUsername] = createSignal("");
   const [email, setEmail] = createSignal("");
   const [password, setPassword] = createSignal("");
 
   function onSubmit(e: SubmitEvent) {
     e.preventDefault();
+
+    fetch("http://localhost:8080/api/user", {
+      method: "POST",
+      body: JSON.stringify({
+        email: email(),
+        password: password(),
+        username: username(),
+      }),
+    });
   }
 
   return (
     <form class="p-4" on:submit={onSubmit}>
-      <InputText label="Nome" name="name" value={name()} onChange={setName} />
-
       <InputText
-        label="Cognome"
-        name="surname"
-        value={surname()}
-        onChange={setSurname}
+        label="Username"
+        name="username"
+        value={username()}
+        onChange={setUsername}
       />
 
       <InputText

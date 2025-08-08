@@ -2,25 +2,44 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type User struct {
 	CreatedAt    time.Time `json:"created_at"`
 	Email        string    `json:"email"`
-	FirstName    string    `json:"firstname"`
 	ID           uuid.UUID `json:"id"`
-	LastName     string    `json:"lastname"`
 	PasswordHash *string   `json:"-"`
 	UpdatedAt    time.Time `json:"updated_at"`
+	Username     string    `json:"username"`
 }
-
 type UserRepository struct {
 	db *sql.DB
 }
 
 func NewUserRepository(db *sql.DB) *UserRepository {
 	return &UserRepository{db: db}
+}
+
+func (userRepo *UserRepository) CreateUser(user *User) (*User, error) {
+	query := `
+		INSERT INTO users (username, email, password_hash)
+		VALUES ($1, $2, $3)
+		RETURNING id, created_at, updated_at
+	`
+
+	err := userRepo.db.QueryRow(query, user.Username, user.Email, user.PasswordHash).Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		if pgErr, ok := err.(*pq.Error); ok && pgErr.Code == "23505" {
+			return nil, errors.New("email already exists")
+		}
+		return nil, fmt.Errorf("insert user: %w", err)
+	}
+
+	return user, nil
 }
