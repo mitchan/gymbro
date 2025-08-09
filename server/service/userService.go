@@ -85,3 +85,61 @@ func (userService *UserService) CreateUser(req model.CreateUser) (*model.Respons
 		ID:          user.ID.String(),
 	}, nil
 }
+
+func (userService *UserService) Login(req model.LoginUser) (*model.ResponseLoginUser, error) {
+	log.Printf("UserService.Login - Starting login for: %s", req.Email)
+
+	if req.Email == "" || req.Password == "" {
+		log.Printf("UserService.Login - Validation failed: missing required fields")
+		return nil, fmt.Errorf("email and password are required")
+	}
+
+	hashedPassword, err := util.HashPassword(req.Password)
+	if err != nil {
+		log.Printf("UserService.CreateUser - Password hashing failed: %v", err)
+		return nil, fmt.Errorf("failed to process password")
+	}
+
+	u := &repository.User{
+		Email:        req.Email,
+		PasswordHash: &hashedPassword,
+	}
+
+	user, err := userService.userRepo.GetUserByEmail(u)
+	if err != nil {
+		log.Printf("UserService.Login - Database error: %v", err)
+		return nil, fmt.Errorf("failed to authenticate user")
+	}
+
+	if user == nil {
+		log.Printf("UserService.Login - User not found for email: %s", req.Email)
+		return nil, fmt.Errorf("invalid email or password")
+	}
+
+	err = util.CheckPassword(req.Password, *user.PasswordHash)
+	if err != nil {
+		log.Printf("UserService.Login - Password check failed for user: %s", user.ID.String())
+		return nil, fmt.Errorf("invalid email or password")
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, JWTClaims{
+		ID:       user.ID.String(),
+		Username: user.Username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    user.ID.String(),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		},
+	})
+
+	secretKey := util.GetEnv("JWT_SECRET_KEY", "")
+	ss, err := token.SignedString([]byte(secretKey))
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.ResponseLoginUser{
+		AccessToken: ss,
+		Username:    user.Username,
+		ID:          user.ID.String(),
+	}, nil
+}

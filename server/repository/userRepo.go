@@ -43,3 +43,21 @@ func (userRepo *UserRepository) CreateUser(user *User) (*User, error) {
 
 	return user, nil
 }
+
+func (userRepo *UserRepository) GetUserByEmail(user *User) (*User, error) {
+	query := `
+	  SELECT id, username, password_hash FROM users
+	  WHERE email = $1
+  `
+
+	err := userRepo.db.QueryRow(query, user.Email).Scan(&user.ID, &user.Username, &user.PasswordHash)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			// user not found
+			return nil, nil
+		}
+		return nil, fmt.Errorf("query login user: %w", err)
+	}
+
+	return user, nil
+}
