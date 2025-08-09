@@ -9,4 +9,5 @@ import (
 func SetupRouter(userHandler *handler.UserHandler) {
 	// user
 	http.HandleFunc("POST /api/user", userHandler.CreateUser)
+	http.HandleFunc("POST /api/user/login", userHandler.Login)
 }
