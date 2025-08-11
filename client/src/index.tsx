@@ -8,6 +8,7 @@ import { lazy } from "solid-js";
 const root = document.getElementById("root");
 
 const Home = lazy(() => import("./pages/Home"));
+const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 
 if (root) {
@@ -15,6 +16,7 @@ if (root) {
     () => (
       <Router root={App}>
         <Route path="/" component={Home} />
+        <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
       </Router>
     ),
