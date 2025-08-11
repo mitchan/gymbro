@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mitchan/gymbro/handler"
+	"github.com/mitchan/gymbro/middleware"
 )
 
 func TestMiddlware(next http.Handler) http.Handler {
@@ -21,7 +22,12 @@ func NewRouter(userHandler *handler.UserHandler) *http.ServeMux {
 
 	// user
 	router.HandleFunc("POST /api/user", userHandler.CreateUser)
-	router.HandleFunc("POST /api/user/login", userHandler.Login)
+
+	// auth router
+	authRouter := http.NewServeMux()
+	authRouter.HandleFunc("POST /api/user/login", userHandler.Login)
+
+	router.Handle("/", middleware.JwtAuth(authRouter))
 
 	// TEST: route with parameter
 	router.HandleFunc("GET /api/user/{id}", func(w http.ResponseWriter, r *http.Request) {
