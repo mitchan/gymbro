@@ -61,3 +61,21 @@ func (userRepo *UserRepository) GetUserByEmail(user *User) (*User, error) {
 
 	return user, nil
 }
+
+func (userRepo *UserRepository) GetUserByID(user *User) (*User, error) {
+	query := `
+	  SELECT email, username, password_hash FROM users
+	  WHERE id = $1
+  `
+
+	err := userRepo.db.QueryRow(query, user.ID).Scan(&user.Email, &user.Username, &user.PasswordHash)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			// user not found
+			return nil, nil
+		}
+		return nil, fmt.Errorf("query login user: %w", err)
+	}
+
+	return user, nil
+}

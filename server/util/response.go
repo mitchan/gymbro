@@ -14,3 +14,7 @@ func WriteJSON(w http.ResponseWriter, status int, v any) {
 func WriteError(w http.ResponseWriter, status int, msg string) {
 	WriteJSON(w, status, map[string]string{"error": msg})
 }
+
+func WriteUnauthed(w http.ResponseWriter) {
+	WriteJSON(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+}

@@ -1,12 +1,15 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+	"github.com/mitchan/gymbro/middleware"
 	"github.com/mitchan/gymbro/model"
 	"github.com/mitchan/gymbro/repository"
 	"github.com/mitchan/gymbro/util"
@@ -141,5 +144,41 @@ func (userService *UserService) Login(req model.LoginUser) (*model.ResponseLogin
 		AccessToken: ss,
 		Username:    user.Username,
 		ID:          user.ID.String(),
+	}, nil
+}
+
+func (userService *UserService) Me(ctx context.Context) (*model.ResponseMeUser, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	id, ok := ctx.Value(middleware.AuthUser).(string)
+	fmt.Println("id is: " + id)
+	if !ok {
+		log.Printf("UserService.Me - cannot retrieve AuthUser from context")
+		return nil, model.UnauthedError
+	}
+
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		log.Printf("UserService.Me - cannot convert %s to uuid", id)
+		return nil, model.UnauthedError
+	}
+	u := &repository.User{
+		ID: uuid,
+	}
+	user, err := userService.userRepo.GetUserByID(u)
+	if err != nil {
+		log.Printf("UserService.Me - Database error: %v", err)
+		return nil, fmt.Errorf("failed to get user")
+	}
+
+	if user == nil {
+		log.Printf("UserService.Me - User not found for id: %s", id)
+		return nil, fmt.Errorf("failed to get user")
+	}
+
+	return &model.ResponseMeUser{
+		Username: user.Username,
+		ID:       user.ID.String(),
 	}, nil
 }
