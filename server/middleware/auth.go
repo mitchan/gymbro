@@ -10,22 +10,17 @@ import (
 
 const AuthUser = "middleware.auth.user"
 
-func writeUnauthed(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusUnauthorized)
-	w.Write([]byte(http.StatusText(http.StatusUnauthorized)))
-}
-
 func JwtAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("jwt")
 		if err != nil {
-			writeUnauthed(w)
+			util.WriteUnauthed(w)
 			return
 		}
 
 		tokenString := cookie.Value
 		if tokenString == "" {
-			writeUnauthed(w)
+			util.WriteUnauthed(w)
 			return
 		}
 
@@ -37,19 +32,19 @@ func JwtAuth(next http.Handler) http.Handler {
 		})
 
 		if err != nil || !token.Valid {
-			writeUnauthed(w)
+			util.WriteUnauthed(w)
 			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			writeUnauthed(w)
+			util.WriteUnauthed(w)
 			return
 		}
 
 		userID, ok := claims["id"].(string)
 		if !ok {
-			writeUnauthed(w)
+			util.WriteUnauthed(w)
 			return
 		}
 

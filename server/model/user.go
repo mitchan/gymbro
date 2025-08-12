@@ -16,3 +16,8 @@ type ResponseLoginUser struct {
 	ID          string `json:"id"`
 	Username    string `json:"username"`
 }
+
+type ResponseMeUser struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+}

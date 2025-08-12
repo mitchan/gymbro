@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
@@ -76,6 +77,21 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 	})
+
+	util.WriteJSON(w, http.StatusOK, user)
+}
+
+func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
+	user, err := h.userService.Me(r.Context())
+	if err != nil {
+		if errors.Is(err, model.UnauthedError) {
+			util.WriteUnauthed(w)
+			return
+		}
+
+		util.WriteError(w, http.StatusInternalServerError, "cannot retrieve user")
+		return
+	}
 
 	util.WriteJSON(w, http.StatusOK, user)
 }
