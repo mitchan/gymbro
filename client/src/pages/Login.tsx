@@ -47,12 +47,12 @@ export default function Login() {
         setUser(user);
         navigate("/", { replace: true });
       })
-      .finally(() => {
-        setLoading(false);
-      })
       .catch((error) => {
         // TODO: show error to the user
         console.error(error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }
 
