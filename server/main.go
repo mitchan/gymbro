@@ -7,6 +7,7 @@ import (
 	"github.com/mitchan/gymbro/db"
 	"github.com/mitchan/gymbro/db/migrations"
 	"github.com/mitchan/gymbro/handler"
+	"github.com/mitchan/gymbro/middleware"
 	"github.com/mitchan/gymbro/repository"
 	"github.com/mitchan/gymbro/router"
 	"github.com/mitchan/gymbro/service"
@@ -31,14 +32,20 @@ func main() {
 
 	// repos
 	userRepo := repository.NewUserRepository(dbConn)
+	workoutRepo := repository.NewWorkoutRepository(dbConn)
 
 	// services
 	userService := service.NewUserService(userRepo)
+	workoutService := service.NewWorkoutService(workoutRepo)
 
 	// handlers
 	userHandler := handler.NewUserHandler(userService)
+	workoutHandler := handler.NewWorkoutHandler(workoutService)
 
-	r := router.NewRouter(userHandler)
+	// middlewares
+	authMiddleware := middleware.NewAuthMiddleware(userRepo)
+
+	r := router.NewRouter(authMiddleware, userHandler, workoutHandler)
 
 	server := http.Server{
 		Addr:    ":8080",
