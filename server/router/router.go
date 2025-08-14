@@ -17,7 +17,11 @@ func TestMiddlware(next http.Handler) http.Handler {
 	})
 }
 
-func NewRouter(userHandler *handler.UserHandler) *http.ServeMux {
+func NewRouter(
+	authMiddleware *middleware.AuthMiddleware,
+	userHandler *handler.UserHandler,
+	workoutHandler *handler.WorkoutHandler,
+) *http.ServeMux {
 	router := http.NewServeMux()
 
 	// user
@@ -28,7 +32,9 @@ func NewRouter(userHandler *handler.UserHandler) *http.ServeMux {
 	authRouter := http.NewServeMux()
 	authRouter.HandleFunc("GET /api/user/me", userHandler.Me)
 
-	router.Handle("/", middleware.JwtAuth(authRouter))
+	authRouter.HandleFunc("GET /api/workouts", workoutHandler.GetWorkouts)
+
+	router.Handle("/", authMiddleware.JwtAuth(authRouter))
 
 	// TEST: route with parameter (to be removed)
 	// router.HandleFunc("GET /api/user/{id}", func(w http.ResponseWriter, r *http.Request) {
