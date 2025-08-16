@@ -2,8 +2,9 @@ import { createSignal } from "solid-js";
 import { InputText } from "../components/inputs/InputText";
 import { Button } from "../components/ui/Button";
 import z from "zod";
-import { setUser } from "../store/app";
+import { setUser, userSchema } from "../store/app";
 import { useNavigate } from "@solidjs/router";
+import { apiClient } from "../lib/api/apiClient";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -16,13 +17,13 @@ export default function Register() {
   function onSubmit(e: SubmitEvent) {
     e.preventDefault();
 
-    const userSchema = z.object({
+    const registerSchema = z.object({
       email: z.email(),
       password: z.string().min(8),
       username: z.string().trim().min(1),
     });
 
-    const user = userSchema.safeParse({
+    const user = registerSchema.safeParse({
       email: email(),
       password: password(),
       username: username(),
@@ -35,19 +36,17 @@ export default function Register() {
     }
 
     setLoading(true);
-    fetch("/api/user", {
-      method: "POST",
-      body: JSON.stringify(user.data),
-    })
-      .then((resp) => {
-        if (!resp.ok) {
-          throw new Error("HTTP error");
-        }
-
-        return resp.json();
+    apiClient
+      .fetch("/api/user", {
+        method: "POST",
+        body: JSON.stringify(user.data),
       })
       .then((user) => {
-        setUser(user);
+        const userData = userSchema.safeParse(user);
+        if (!userData.success) {
+          throw new Error("cannot validate user");
+        }
+        setUser(userData.data);
         navigate("/", { replace: true });
       })
       .catch((error) => {

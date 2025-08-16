@@ -1,6 +1,7 @@
 import { onMount, Show } from "solid-js";
 import type { JSX } from "solid-js/jsx-runtime";
 import { setUser, user, userSchema } from "../store/app";
+import { apiClient } from "../lib/api/apiClient";
 
 interface Props {
   children?: JSX.Element;
@@ -13,16 +14,9 @@ export default function UserProtected(props: Props) {
       return;
     }
 
-    fetch("/api/user/me", {
-      method: "get",
-      credentials: "include",
-    })
-      .then((resp) => {
-        if (!resp.ok) {
-          throw new Error("HTTP error");
-        }
-
-        return resp.json();
+    apiClient
+      .fetch("/api/user/me", {
+        method: "get",
       })
       .then((user) => {
         const userData = userSchema.safeParse(user);

@@ -2,8 +2,9 @@ import { createSignal } from "solid-js";
 import { InputText } from "../components/inputs/InputText";
 import { Button } from "../components/ui/Button";
 import z from "zod";
-import { setUser } from "../store/app";
+import { setUser, userSchema } from "../store/app";
 import { useNavigate } from "@solidjs/router";
+import { apiClient } from "../lib/api/apiClient";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -32,19 +33,17 @@ export default function Login() {
     }
 
     setLoading(true);
-    fetch("/api/user/login", {
-      method: "POST",
-      body: JSON.stringify(loginData.data),
-    })
-      .then((resp) => {
-        if (!resp.ok) {
-          throw new Error("HTTP error");
-        }
-
-        return resp.json();
+    apiClient
+      .fetch("/api/user/login", {
+        method: "POST",
+        body: JSON.stringify(loginData.data),
       })
       .then((user) => {
-        setUser(user);
+        const userData = userSchema.safeParse(user);
+        if (!userData.success) {
+          throw new Error("cannot validate user");
+        }
+        setUser(userData.data);
         navigate("/", { replace: true });
       })
       .catch((error) => {
