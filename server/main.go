@@ -14,10 +14,7 @@ import (
 )
 
 func main() {
-	dbConn, err := db.NewDatabase()
-	if err != nil {
-		log.Fatalf("Could not initialize DB connection: %s", err)
-	}
+	dbConn := db.NewDatabase()
 	defer dbConn.Close()
 
 	if err := dbConn.Ping(); err != nil {
